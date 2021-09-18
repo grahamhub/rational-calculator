@@ -122,38 +122,56 @@ class CLI
     end
 
     def calculate!
-        # PEMDAS = M -> D -> A -> S
-        operate! "*" if current_input.size > 1
-        operate! "/" if current_input.size > 1
-        operate! "+" if current_input.size > 1
-        operate! "-" if current_input.size > 1
+        operate! method(:next_mult_or_div)
+        operate! method(:next_add_or_sub)
     end
 
     private
 
     attr_reader :calculator, :validator, :current_input
 
-    def operate!(operator)
-        num_one_ptr = 0
-        operator_ptr = 1
-        num_two_ptr = 2
+    def operate!(which_ops)
+        while which_ops.call != nil
+            operator_ptr = which_ops.call
+            num_one_ptr = operator_ptr - 1
+            num_two_ptr = operator_ptr + 1
 
-        while num_two_ptr < current_input.size
-            if current_input[operator_ptr] == operator
-                num_one = current_input[num_one_ptr]
-                num_two = current_input[num_two_ptr]
-                new_num = calculator.calculate(num_one, operator, num_two)
+            num_one = current_input[num_one_ptr]
+            operator = current_input[operator_ptr]
+            num_two = current_input[num_two_ptr]
+            new_num = calculator.calculate(num_one, operator, num_two)
 
-                current_input[num_one_ptr] = new_num
-                current_input[operator_ptr] = nil
-                current_input[num_two_ptr] = nil
-            end
+            current_input[num_one_ptr] = new_num
+            current_input[operator_ptr] = nil
+            current_input[num_two_ptr] = nil
 
-            num_one_ptr += 2
-            operator_ptr += 2
-            num_two_ptr += 2
+            current_input.delete_if { |num| num.nil? }
         end
+    end
 
-        current_input.delete_if { |num| num.nil? }
+    def next_mult_or_div
+        mult = current_input.find_index "*"
+        div = current_input.find_index "/"
+
+        if mult.nil? && div.nil?
+            return nil
+        elsif !div.nil? && (mult.nil? || mult > div)
+            return div
+        elsif !mult.nil? && (div.nil? || div > mult)
+            return mult
+        end
+    end
+
+    def next_add_or_sub
+        add = current_input.find_index "+"
+        sub = current_input.find_index "-"
+
+        if add.nil? && sub.nil?
+            return nil
+        elsif !add.nil? && (sub.nil? || sub > add)
+            return add
+        elsif !sub.nil? && (add.nil? || add > sub)
+            return sub
+        end
     end
 end

@@ -62,6 +62,9 @@ class AppTest < MiniTest::Test
         @cli.parse! "2_3/8 + 9/8 * 2 - 1/2 / 3_1/2"
         @cli.calculate!
         assert_output("= 4_27/56\n") { @cli.put }
+        @cli.parse! "19/8 + 9/8 * 2 - 1/2 - 3 + 4 * 7 + 1"
+        @cli.calculate!
+        assert_output("= 30_1/8\n") { @cli.put }
         assert_output("ERROR: Divide by zero\n") { @cli.parse! "2_3/8 + 9/0" }
         assert_output("ERROR: Divide by zero\n") { @cli.parse! "2_3/8 + 9/8 / 0" }
     end
