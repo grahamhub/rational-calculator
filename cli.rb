@@ -56,7 +56,11 @@ class CLI
     end
 
     def invalid_input?(input)
-        input.index(/[a-zA-Z]/) != nil
+        input.match(/[a-zA-Z!@#$%^&()=]/) != nil
+    end
+
+    def div_by_zero?(input)
+        input.match(/(\/0)|(\/\s+0)/) != nil
     end
 
     def get
@@ -86,6 +90,12 @@ class CLI
         if invalid_input? input
             @error = true
             puts "ERROR: Invalid input"
+            return
+        end
+
+        if div_by_zero? input
+            @error = true
+            puts "ERROR: Divide by zero"
             return
         end
 
