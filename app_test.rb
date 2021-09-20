@@ -40,16 +40,16 @@ class AppTest < MiniTest::Test
         assert_equal(true, @cli.invalid_input?("1/2 * test"))
     end
 
+    def test_div_by_zero
+        assert_equal(true, @cli.div_by_zero?("2_3/8 + 9/0"))
+        assert_equal(true, @cli.div_by_zero?("2_3/8 + 9/8 / 0"))
+        assert_equal(false, @cli.div_by_zero?("2_3/8 + 9/8 * 2 - 1/2 / 3_1/2"))
+    end
+
     def test_format
         assert_equal("= 1_1/2", @cli.format(3/2r))
         assert_equal("= 3/4", @cli.format(3/4r))
         assert_equal("= 1", @cli.format(3/3r))
-    end
-
-    def test_active
-        assert_equal(true, @cli.active)
-        @cli.parse! "exit"
-        assert_equal(false, @cli.active)
     end
 
     def test_cli
@@ -65,7 +65,5 @@ class AppTest < MiniTest::Test
         @cli.parse! "19/8 + 9/8 * 2 - 1/2 - 3 + 4 * 7 + 1"
         @cli.calculate!
         assert_output("= 30_1/8\n") { @cli.put }
-        assert_output("ERROR: Divide by zero\n") { @cli.parse! "2_3/8 + 9/0" }
-        assert_output("ERROR: Divide by zero\n") { @cli.parse! "2_3/8 + 9/8 / 0" }
     end
 end

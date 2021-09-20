@@ -39,13 +39,12 @@ class Calculator
 end
 
 class CLI
-    attr_reader :active, :error
+    attr_reader :error
 
     def initialize(display_help)
         @calculator = Calculator.new
-        @active = true
         @error = false
-        @current_input = []
+        @current_input = ""
         help if display_help
     end
 
@@ -55,57 +54,43 @@ class CLI
         puts "To exit the program, enter 'exit' as an input"
     end
 
-    def invalid_input?(input)
+    def invalid_input?(input=@current_input)
         input.match(/[a-zA-Z!@#$%^&()=]/) != nil
     end
 
-    def div_by_zero?(input)
+    def div_by_zero?(input=@current_input)
         input.match(/(\/0)|(\/\s+0)/) != nil
     end
 
-    def get
-        print '? '
-        gets.chomp
-    end
-
-    def put
-        if active && !error
-            puts format(current_input[0])
-        elsif !active
-            puts "Goodbye!"
-        end
-    end
-
-    def parse!(input)
+    def validate(input=@current_input)
         if input.downcase.include? 'exit'
-            @active = false
-            return
-        end
+            abort("Goodbye!")
 
-        if input.downcase.include? 'help'
-            help
-            return
-        end
-
-        if invalid_input? input
+        elsif invalid_input? input
             @error = true
             puts "ERROR: Invalid input"
-            return
-        end
 
-        if div_by_zero? input
+        elsif div_by_zero? input
             @error = true
             puts "ERROR: Divide by zero"
-            return
-        end
 
-        @error = false
-        @current_input = input.split(/\s+/)
-
-        if current_input.size <= 2
+        elsif input.split(/\s+/).size <= 2
             @error = true
             puts "ERROR: Not enough arguments"
         end
+    end
+
+    def get!
+        print '? '
+        @current_input = gets.chomp
+    end
+
+    def put
+        puts format(@current_input[0])
+    end
+
+    def parse!(input=@current_input)
+        @current_input = input.split(/\s+/)
     end
 
     def format(num)
@@ -128,30 +113,28 @@ class CLI
 
     private
 
-    attr_reader :calculator, :validator, :current_input
-
     def operate!(which_ops)
         while which_ops.call != nil
             operator_ptr = which_ops.call
             num_one_ptr = operator_ptr - 1
             num_two_ptr = operator_ptr + 1
 
-            num_one = current_input[num_one_ptr]
-            operator = current_input[operator_ptr]
-            num_two = current_input[num_two_ptr]
-            new_num = calculator.calculate(num_one, operator, num_two)
+            num_one = @current_input[num_one_ptr]
+            operator = @current_input[operator_ptr]
+            num_two = @current_input[num_two_ptr]
+            new_num = @calculator.calculate(num_one, operator, num_two)
 
-            current_input[num_one_ptr] = new_num
-            current_input[operator_ptr] = nil
-            current_input[num_two_ptr] = nil
+            @current_input[num_one_ptr] = new_num
+            @current_input[operator_ptr] = nil
+            @current_input[num_two_ptr] = nil
 
-            current_input.delete_if { |num| num.nil? }
+            @current_input.delete_if { |num| num.nil? }
         end
     end
 
     def next_mult_or_div
-        mult = current_input.find_index "*"
-        div = current_input.find_index "/"
+        mult = @current_input.find_index "*"
+        div = @current_input.find_index "/"
 
         if mult.nil? && div.nil?
             return nil
@@ -163,8 +146,8 @@ class CLI
     end
 
     def next_add_or_sub
-        add = current_input.find_index "+"
-        sub = current_input.find_index "-"
+        add = @current_input.find_index "+"
+        sub = @current_input.find_index "-"
 
         if add.nil? && sub.nil?
             return nil
