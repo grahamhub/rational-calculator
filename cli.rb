@@ -125,10 +125,9 @@ class CLI
             new_num = @calculator.calculate(num_one, operator, num_two)
 
             @current_input[num_one_ptr] = new_num
-            @current_input[operator_ptr] = nil
-            @current_input[num_two_ptr] = nil
 
-            @current_input.delete_if { |num| num.nil? }
+            @current_input.delete_at num_two_ptr
+            @current_input.delete_at operator_ptr
         end
     end
 
