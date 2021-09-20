@@ -65,5 +65,8 @@ class AppTest < MiniTest::Test
         @cli.parse! "19/8 + 9/8 * 2 - 1/2 - 3 + 4 * 7 + 1"
         @cli.calculate!
         assert_output("= 30_1/8\n") { @cli.put }
+        @cli.parse! "1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1"
+        @cli.calculate!
+        assert_output("= 18\n") { @cli.put }
     end
 end
